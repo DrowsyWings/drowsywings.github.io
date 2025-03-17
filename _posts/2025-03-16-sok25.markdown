@@ -1,0 +1,157 @@
+---
+layout: post
+title: "Win2Linux-Chooser: An app to help migrate from Windows to Linux"
+date: 2025-03-16
+categories: kde sok
+author: DrowsyWings
+---
+
+### Introduction
+
+One of the biggest problem for users switching from Windows to Linux is choosing the right distribution.
+The project aims to help users migrate from Windows to GNU/Linux by analyzing their system specifications, asking relevant questions, and recommending a ranked list of distributions based on their preferences.
+
+This post will break down how we approached this problem in Sok25, focusing on two core challenges:
+
+1. Designing a **recommendation logic** that ranks distributions based on user preferences.
+2. Detecting **hardware specifications** and integrating them into the ranking logic.
+
+### Step 1: Designing the Questionnaire
+
+To keep things simple, we decided to limit the number of questions. Instead of overwhelming users with technical details, we settled on a set of key questions. These questions covers parameters like:
+
+- Ease of installation
+- Support for older hardware
+- Quality of documentation
+- Community support
+- Frequency of updates (Rolling or Point)
+- Preferred UI style (Windows-like or Mac-like)
+
+Each response contributes to a "parameter" of **user preference vector**, which helps in matching the needs of user with the best-fitting distributions.
+
+---
+
+### Step 2: Selecting Initial Distributions
+
+We initially started with a limited set of well-known beginner-friendly distributions:
+
+- **Fedora KDE**
+- **Kubuntu**
+- **Lubuntu**
+- **Linux Mint XFCE**
+- **Linux Mint Cinnamon**
+
+Later, **Pop!\_OS** was also added based on its popularity and user demand.
+
+---
+
+### Step 3: The Recommendation Logic
+
+The core logic behind ranking distributions is **vector-based similarity measurement**. Each distribution is represented as a vector, with dimensions corresponding to the parameters defined in our questionnaire.
+
+The approach works as follows:
+
+1. **User Preference Vector**: The answers provided by the user form a vector with numerical values assigned to each preference.
+2. **Predefined Distribution Vectors**: Each distribution has a corresponding vector based on predefined scores.
+3. **Similarity Calculation**: The similarity between the user vector and each distribution vector is computed using a mathematical function.
+
+> TL;DR : We are using dot product and a penalty criteria (multiplying by 0.5) for ranking the distros
+
+#### Choosing the Right Similarity Function
+
+Initially, we considered **cosine similarity**, but we found that **dot product** gave better results.
+
+- **Cosine Similarity** measures how closely two vectors align in terms of direction, but it ignores magnitude.
+- **Dot Product** considers both direction and magnitude, making it a better fit since we care about absolute scores.
+
+Example:
+
+![example](/assets/images/example.png)
+
+According to dot product :
+A>B>C
+Dot Product recommends Distro A as the best choice, which makes sense.
+
+But according to cosine similarity:
+C>B>A
+
+Distro C appear as the best match because it follows the same ratio (even though its scores are much lower).
+Since we care about absolute quality in preferred criteria rather than just proportional similarity, dot product is the better approach.
+
+Here’s how we implemented the ranking in Python:
+
+```python
+    def recommend(self):
+        if not self.user_vector or not self.distro_vectors:
+            return "No sufficient data to generate recommendations."
+
+        scores = {}
+        user_vector_np = np.array(self.user_vector)
+
+        for distro, vector in self.distro_vectors.items():
+            distro_vector_np = np.array(vector)
+            score = np.dot(user_vector_np, distro_vector_np)
+
+            scores[distro] = score
+
+        sorted_indices = np.argsort(list(scores.values()))[::-1]
+        ranked_recommendations = [(list(scores.keys())[i], list(scores.values())[i]) for i in sorted_indices]
+        return ranked_recommendations
+```
+
+---
+
+### Step 4: Handling Categorical Questions
+
+While numerical parameters like "Ease of Installation" are easy to quantify, **categorical preferences** (e.g., "Do you prefer a Windows-like UI?") are more like binary or ternary preference and are difficult to score.
+
+To handle this, we introduced a **penalty mechanism**:
+
+- If a distribution does not match the user's categorical preference, a **penalty factor** (e.g., 0.5) is applied to its score.
+- This ensures that distributions aligning with strong user preferences are ranked higher.
+
+Here’s the modified code which ranks distros with penalties:
+
+```python
+  def recommend(self, penalty_factor=0.5):
+        if not self.user_vector or not self.distro_vectors:
+            return []  # Return an empty list instead of a string
+
+        scores = {}
+        user_vector_np = np.array(self.user_vector)
+        binary_params = {"updates", "UI_Look"}
+
+        for distro, data in self.distro_vectors.items():
+            distro_vector_np = np.array(data["scores"])
+            final_score = np.dot(user_vector_np, distro_vector_np)
+
+            for param in binary_params:
+                if param in self.user_binary_preferences and param in data["raw_scores"]:
+                    if self.user_binary_preferences[param] != data["raw_scores"][param]:
+                        final_score *= penalty_factor
+
+            scores[distro] = final_score
+
+        return sorted(scores.items(), key=lambda x: x[1], reverse=True)
+```
+
+---
+
+### Conclusion
+
+This ranking system forms the backbone of **Win2Linux-Chooser**, helping users find the most suitable Linux distribution based on their needs. While our initial model looks good, we are still refining the parameters(questionnaire) and expanding the dataset.
+
+#### Final Recommendations in Action
+
+<p align="center">
+  <img src="/assets/images/demo.gif" alt="Win2Linux-Chooser in Action" width="700">
+</p>
+
+---
+
+Next steps include:
+
+- **Enhancing hardware detection** to factor in compatibility scores.
+- **Improving penalty logic** for better handling of categorical preferences.
+
+This project has been an exciting challenge, and we’re looking forward to refining it further. Stay tuned for more updates!

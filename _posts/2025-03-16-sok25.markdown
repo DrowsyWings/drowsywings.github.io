@@ -19,8 +19,6 @@ This post will break down how we approached this problem in SoK25, focusing on t
 
 ### Original Idea
 
----
-
 #### Step 1: Initial Design for the Questionnaire
 
 When we started the project, we considered including a range of distributions and desktop environments. Over the course of SoK, however, we decided to limit the recommendations to distributions offering KDE Plasma. I will first present the original idea.
@@ -47,8 +45,6 @@ We initially started with a limited set of well-known beginner-friendly distribu
 - **Linux Mint Cinnamon**
 
 ### Revised Idea
-
----
 
 Over the course of SoK25 we decided to narrow the scope of the chooser app and rename it **Win10-2-KDE-Chooser**. After receiving some feedback from the community, we decided it made sense to focus on KDE-only solutions for a Season of KDE project, while others can adapt the idea at a later date.  
 With this new scope, we think the app can be promoted by the KDE community in the context of the 'End Of 10' campaign. The new scope includes:
@@ -149,8 +145,6 @@ Here’s the modified code which ranks distros with penalties:
 
 ### Conclusion
 
----
-
 This ranking system forms the backbone of **the chooser app**, helping users find the most suitable distribution based on their needs.
 While our initial model looks good, we are still refining the parameters (questionnaire), expanding the dataset, and revising the app to fit the new scope
 
@@ -162,8 +156,6 @@ Next steps include:
 This project has been an exciting challenge and I'm looking forward to refining it further. Stay tuned for more updates!
 
 ### Acknowledgement
-
----
 
 Thank you to the Season of KDE 2025 admin and mentorship team, in particular flyingcakes an Aakarsh MJ and Joseph, the KDE e.V., and the incredible KDE community for supporting this project.
 

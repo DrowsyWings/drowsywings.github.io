@@ -34,8 +34,6 @@ To keep things simple, we decided to limit the number of questions we would ask 
 
 Each response contributes to a "parameter" of **user preference vector**, which helps in matching the needs of user with the best-fitting distributions.
 
----
-
 #### Step 2: Selecting Initial Distributions
 
 We initially started with a limited set of well-known beginner-friendly distributions:
@@ -45,8 +43,6 @@ We initially started with a limited set of well-known beginner-friendly distribu
 - **Lubuntu**
 - **Linux Mint XFCE**
 - **Linux Mint Cinnamon**
-
----
 
 ### Revised Idea
 
@@ -58,8 +54,6 @@ With this new scope, we think the app can be promoted by the KDE community in th
 - The recommended distros for first-time users include **Fedora KDE**, **Kubuntu**, and **Debian KDE** (specifically the live installer, which uses Calamares).
 
 In the rest of this SoK25 post, I will describe the implementation of the original idea in more detail, and this can later be adapted before release. This has been the focus of my work for the first half of SoK25.
-
----
 
 ### Step 3: The Recommendation Logic
 
@@ -115,8 +109,6 @@ Here’s how we implemented the ranking in Python:
         return ranked_recommendations
 ```
 
----
-
 ### Step 4: Handling Categorical Questions
 
 While numerical parameters like "Ease of Installation" are easy to quantify, **categorical preferences** (e.g., "Do you prefer a Windows-like UI?") are more like binary or ternary preferences and are difficult to score.
@@ -151,14 +143,10 @@ Here’s the modified code which ranks distros with penalties:
         return sorted(scores.items(), key=lambda x: x[1], reverse=True)
 ```
 
----
-
 ### Conclusion
 
 This ranking system forms the backbone of **the chooser app**, helping users find the most suitable distribution based on their needs.
 While our initial model looks good, we are still refining the parameters (questionnaire), expanding the dataset, and revising the app to fit the new scope
-
----
 
 Next steps include:
 

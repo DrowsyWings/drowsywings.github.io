@@ -2,23 +2,27 @@
 layout: post
 title: "Win2Linux-Chooser: An app to help migrate from Windows to Linux"
 date: 2025-03-16
-categories: kde sok
+categories: kde SoK
 author: DrowsyWings
 ---
 
 ### Introduction
 
-One of the biggest problem for users switching from Windows to Linux is choosing the right distribution.
-The project aims to help users migrate from Windows to GNU/Linux by analyzing their system specifications, asking relevant questions, and recommending a ranked list of distributions based on their preferences.
+One of the biggest obstacles for users switching  to Linux is choosing the right distribution.
+With the end of support for Windows 10 on October 14, 2025, many users are looking for alternatives to continue using their devices.  
+This project aims to help users migrate from Windows 10 to GNU/Linux by analyzing their system specifications, asking relevant questions, and recommending a ranked list of distributions with KDE Plasma based on their preferences.
 
-This post will break down how we approached this problem in Sok25, focusing on two core challenges:
+This post will break down how we approached this problem in SoK25, focusing on two core challenges:
 
 1. Designing a **recommendation logic** that ranks distributions based on user preferences.
 2. Detecting **hardware specifications** and integrating them into the ranking logic.
 
-### Step 1: Designing the Questionnaire
+### Original Idea
+#### Step 1: Initial Design for the Questionnaire
 
-To keep things simple, we decided to limit the number of questions. Instead of overwhelming users with technical details, we settled on a set of key questions. These questions covers parameters like:
+When we started the project, we considered including a range of distributions and desktop environments. Over the course of SoK, however, we decided to limit the recommendations to distributions offering KDE Plasma. I will first present the original idea.
+
+To keep things simple, we decided to limit the number of questions we would ask Windows users. Instead of overwhelming users with technical details, we settled on a set of key questions. These cover parameters like:
 
 - Ease of installation
 - Support for older hardware
@@ -31,7 +35,7 @@ Each response contributes to a "parameter" of **user preference vector**, which 
 
 ---
 
-### Step 2: Selecting Initial Distributions
+#### Step 2: Selecting Initial Distributions
 
 We initially started with a limited set of well-known beginner-friendly distributions:
 
@@ -41,10 +45,20 @@ We initially started with a limited set of well-known beginner-friendly distribu
 - **Linux Mint XFCE**
 - **Linux Mint Cinnamon**
 
-Later, **Pop!\_OS** was also added based on its popularity and user demand.
+---
+### Revised Idea
+
+
+Over the course of SoK25 we decided to narrow the scope of the chooser app and rename it **Win10-2-KDE-Chooser**. After receiving some feedback from the community, we decided it made sense to focus on KDE-only solutions for a Season of KDE project, while others can adapt the idea at a later date.  
+With this new scope, we think the app can be promoted by the KDE community in the context of the 'End Of 10' campaign. The new scope includes:
+
+- The app will target devices running Windows 10.
+- The app will recommend distros with KDE Plasma.
+- The recommended distros for first-time users include **Fedora KDE**, **Kubuntu**, and **Debian KDE** (specifically the live installer, which uses Calamares).
+
+In the rest of this SoK25 post, I will describe the implementation of the original idea in more detail, and this can later be adapted before release. This has been the focus of my work for the first half of SoK25.
 
 ---
-
 ### Step 3: The Recommendation Logic
 
 The core logic behind ranking distributions is **vector-based similarity measurement**. Each distribution is represented as a vector, with dimensions corresponding to the parameters defined in our questionnaire.
@@ -66,16 +80,16 @@ Initially, we considered **cosine similarity**, but we found that **dot product*
 
 Example:
 
-![example](/assets/images/example.png)
+![example](/uploads/56cc59248575787731f0c508abf57670/example.png){width=456 height=164}
 
-According to dot product :
+According to dot product:
 A>B>C
 Dot Product recommends Distro A as the best choice, which makes sense.
 
 But according to cosine similarity:
 C>B>A
 
-Distro C appear as the best match because it follows the same ratio (even though its scores are much lower).
+Distro C appears as the best match because it follows the same ratio (even though its scores are much lower).
 Since we care about absolute quality in preferred criteria rather than just proportional similarity, dot product is the better approach.
 
 Here’s how we implemented the ranking in Python:
@@ -103,7 +117,7 @@ Here’s how we implemented the ranking in Python:
 
 ### Step 4: Handling Categorical Questions
 
-While numerical parameters like "Ease of Installation" are easy to quantify, **categorical preferences** (e.g., "Do you prefer a Windows-like UI?") are more like binary or ternary preference and are difficult to score.
+While numerical parameters like "Ease of Installation" are easy to quantify, **categorical preferences** (e.g., "Do you prefer a Windows-like UI?") are more like binary or ternary preferences and are difficult to score.
 
 To handle this, we introduced a **penalty mechanism**:
 
@@ -139,19 +153,23 @@ Here’s the modified code which ranks distros with penalties:
 
 ### Conclusion
 
-This ranking system forms the backbone of **Win2Linux-Chooser**, helping users find the most suitable Linux distribution based on their needs. While our initial model looks good, we are still refining the parameters(questionnaire) and expanding the dataset.
-
-#### Final Recommendations in Action
-
-<p align="center">
-  <img src="/assets/images/demo.gif" alt="Win2Linux-Chooser in Action" width="700">
-</p>
+This ranking system forms the backbone of **the chooser app**, helping users find the most suitable distribution based on their needs.
+While our initial model looks good, we are still refining the parameters (questionnaire), expanding the dataset, and revising the app to fit the new scope
 
 ---
 
 Next steps include:
 
-- **Enhancing hardware detection** to factor in compatibility scores.
+- **Enhancing hardware detection** to factor in compatibility scores. Given the limited time left in SoK25, I will only focus on Nvidia driver detection.
 - **Improving penalty logic** for better handling of categorical preferences.
 
-This project has been an exciting challenge, and we’re looking forward to refining it further. Stay tuned for more updates!
+This project has been an exciting challenge and I'm looking forward to refining it further. Stay tuned for more updates!
+
+
+---
+
+### Acknowledgement
+
+Thank you to the Season of KDE 2025 admin and mentorship team, in particular flyingcakes an Aakarsh MJ and Joseph, the KDE e.V., and the incredible KDE community for supporting this project.
+
+Please feel free to contact me here: @drowsywings:matrix.org
